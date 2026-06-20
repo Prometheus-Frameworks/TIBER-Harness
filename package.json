@@ -11,6 +11,7 @@
   "scripts": {
     "test": "tsx src/runEvals.ts",
     "eval": "tsx src/runEvals.ts",
+    "eval:ollama": "tsx src/runOllamaEvals.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

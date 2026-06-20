@@ -58,17 +58,18 @@ authoritative decision is computed by the deterministic layers. See
 
 ```
 src/
-  core/        runSkill, validateJson, validateSchema,
-               applyDeterministicOverrides, detectors, providerRegistry, types
-  providers/   MockProvider (CI-safe, offline)
+  core/        runSkill, validateJson, validateSchema, applyDeterministicOverrides,
+               detectors, providerRegistry, expectations, types
+  providers/   MockProvider (CI-safe, offline), OllamaProvider (opt-in, local)
   skills/
     artifactAuditor/      governance / promotion auditing + /promoted/ + injection
     safetyContamination/  fantasy-advice contamination detection
   reports/     writeReport (local JSON + Markdown)
-  runEvals.ts  the `npm test` entrypoint
+  runEvals.ts        the `npm test` entrypoint (MockProvider, offline)
+  runOllamaEvals.ts  the `npm run eval:ollama` entrypoint (opt-in, local model)
 fixtures/      sample TIBER-shaped artifacts (teamstate, fantasy, rookies, forge)
 data/reports/  local report output (gitignored)
-docs/          PROVIDER_BOUNDARY, SKILLS_CONTRACT, MOBILE_HARNESS_PLAN
+docs/          PROVIDER_BOUNDARY, LOCAL_OLLAMA_PROVIDER, SKILLS_CONTRACT, MOBILE_HARNESS_PLAN
 ```
 
 ## Skills in this scaffold
@@ -92,8 +93,25 @@ docs/          PROVIDER_BOUNDARY, SKILLS_CONTRACT, MOBILE_HARNESS_PLAN
 
 ## Providers & the boundary
 
-Only `MockProvider` is wired up. Remote/local providers (Cohere, Ollama,
-llama.cpp / OpenAI-compatible) are **future follow-ups**, each gated behind its
+`MockProvider` is the only provider wired into the default (CI) path.
+
+`OllamaProvider` is an **opt-in, local-only** provider that runs the existing
+fixtures through a locally installed [Ollama](https://ollama.com) model — proof
+that the harness is provider-agnostic beyond the mock. It is never used in CI,
+pulls/installs no models, and carries no API keys:
+
+```bash
+# Requires Ollama running locally and a model already installed.
+TIBER_HARNESS_ALLOW_NETWORK=1 OLLAMA_MODEL=llama3.1 npm run eval:ollama
+```
+
+Loopback HTTP is still a network call, so `eval:ollama` requires
+`TIBER_HARNESS_ALLOW_NETWORK=1` and fails clearly without it (or without
+`OLLAMA_MODEL`, or if Ollama is unreachable). See
+[`docs/LOCAL_OLLAMA_PROVIDER.md`](docs/LOCAL_OLLAMA_PROVIDER.md).
+
+Other remote/local providers (Cohere, llama.cpp / OpenAI-compatible) and
+provider-comparison reports remain **future follow-ups**, each gated behind its
 own credential and never used in CI. See
 [`docs/PROVIDER_BOUNDARY.md`](docs/PROVIDER_BOUNDARY.md).
 

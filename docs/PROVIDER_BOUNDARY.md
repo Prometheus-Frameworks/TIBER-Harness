@@ -30,14 +30,24 @@ interface ModelProvider {
 ## Provider registry
 
 `src/core/providerRegistry.ts` resolves providers by name. It registers
-`MockProvider` and nothing else. Remote/local providers are deliberately absent.
+`MockProvider` and nothing else. Remote/local providers are deliberately absent
+from the registry — even `OllamaProvider` (below) is constructed directly by its
+own opt-in runner, never registered into the default path.
+
+## Opt-in local providers (landed)
+
+- `OllamaProvider` (`src/providers/OllamaProvider.ts`) — local models via
+  `OLLAMA_HOST` + `OLLAMA_MODEL`, run with `npm run eval:ollama`. It sets
+  `requiresNetwork = true` (loopback HTTP is still a network call), so
+  `assertCiSafe` gates it behind `TIBER_HARNESS_ALLOW_NETWORK=1`. It pulls no
+  models and carries no API keys, and is never used in CI. See
+  [`LOCAL_OLLAMA_PROVIDER.md`](LOCAL_OLLAMA_PROVIDER.md).
 
 ## Future providers (follow-ups, not in this scaffold)
 
 These land later, each behind its own credential and never in the CI path:
 
 - `CohereProvider` — behind `COHERE_API_KEY`.
-- `OllamaProvider` — local models via `OLLAMA_HOST`.
 - A `llama.cpp` / OpenAI-compatible local provider.
 - Provider comparison reports.
 
