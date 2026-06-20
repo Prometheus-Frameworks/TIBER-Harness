@@ -1,0 +1,14 @@
+{
+  "artifactType": "forge_alpha_snapshot",
+  "gsisId": "00-0036355",
+  "viewMode": "redraft",
+  "pillars": {
+    "volume": 82,
+    "efficiency": 74,
+    "teamContext": 70,
+    "stability": 69
+  },
+  "alpha": 76,
+  "governanceMarker": "explicit_governed",
+  "note": "Descriptive snapshot only. No start/sit, trade, or ranking advice."
+}

@@ -1,0 +1,14 @@
+{
+  "artifactType": "teamstate_snapshot",
+  "week": 13,
+  "season": 2025,
+  "skillPositions": {
+    "QB": 2,
+    "RB": 5,
+    "WR": 6,
+    "TE": 2
+  },
+  "byeImpacted": ["00-0036355"],
+  "governanceMarker": "none",
+  "note": "Roster composition snapshot. Descriptive only."
+}

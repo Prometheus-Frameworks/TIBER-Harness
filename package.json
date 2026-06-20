@@ -1,0 +1,21 @@
+{
+  "name": "tiber-harness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Model-agnostic runtime and evaluation harness for testing AI providers against TIBER contracts, skills, fixtures, and deterministic safety validators.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "tsx src/runEvals.ts",
+    "eval": "tsx src/runEvals.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.21",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

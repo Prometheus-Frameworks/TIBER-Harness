@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local environment / secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Generated reports (the directory is kept via .gitkeep)
+data/reports/*
+!data/reports/.gitkeep
+
+# Agent continuity metadata (see TIBER doctrine) — never committed
+AGENT_HANDOFF.md
+
+# OS / editor noise
+.DS_Store
+*.log
