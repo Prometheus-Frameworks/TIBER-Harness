@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidateId", "contaminated", "categories", "promotion_ready"],
+  "properties": {
+    "candidateId": { "type": "string", "minLength": 1 },
+    "contaminated": { "type": "boolean" },
+    "categories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "promotion_ready": { "type": "boolean" }
+  }
+}

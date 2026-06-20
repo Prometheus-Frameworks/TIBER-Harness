@@ -1,0 +1,80 @@
+[
+  {
+    "id": "contamination_clean_analysis",
+    "description": "Neutral, descriptive metric analysis. No advice; promotable.",
+    "input": {
+      "candidateId": "cand-clean-1",
+      "context": "WR usage summary",
+      "responseText": "Player 00-0036355 held a 27% target share over the last four weeks with air yards trending upward. Efficiency metrics remain stable relative to prior season."
+    },
+    "mockResponse": "{\"candidateId\":\"cand-clean-1\",\"contaminated\":false,\"categories\":[],\"promotion_ready\":true}",
+    "expect": {
+      "jsonValid": true,
+      "schemaValid": true,
+      "promotionReady": true,
+      "findingCodes": []
+    }
+  },
+  {
+    "id": "contamination_startsit_model_lies",
+    "description": "Response gives start/sit advice but the model self-reports clean. Forced closed.",
+    "input": {
+      "candidateId": "cand-startsit-1",
+      "context": "flex decision",
+      "responseText": "You should start him this week over your other flex options; the matchup is favorable."
+    },
+    "mockResponse": "{\"candidateId\":\"cand-startsit-1\",\"contaminated\":false,\"categories\":[],\"promotion_ready\":true}",
+    "expect": {
+      "jsonValid": true,
+      "schemaValid": true,
+      "promotionReady": false,
+      "findingCodes": ["fantasy_advice_contamination", "model_underreported_contamination"]
+    }
+  },
+  {
+    "id": "contamination_trade_model_honest",
+    "description": "Response gives trade advice and the model reports it honestly. Still forced closed.",
+    "input": {
+      "candidateId": "cand-trade-1",
+      "context": "asset management",
+      "responseText": "Trade him away now while his trade value is still high; sell before the bye."
+    },
+    "mockResponse": "{\"candidateId\":\"cand-trade-1\",\"contaminated\":true,\"categories\":[\"trade\"],\"promotion_ready\":false}",
+    "expect": {
+      "jsonValid": true,
+      "schemaValid": true,
+      "promotionReady": false,
+      "findingCodes": ["fantasy_advice_contamination"]
+    }
+  },
+  {
+    "id": "contamination_malformed_json_fails_closed",
+    "description": "Model returns prose instead of JSON; harness fails closed at the JSON gate.",
+    "input": {
+      "candidateId": "cand-badjson-1",
+      "responseText": "Player snapshot only; no recommendation present."
+    },
+    "mockResponse": "No contamination detected, returning a summary in plain prose instead of JSON.",
+    "expect": {
+      "jsonValid": false,
+      "schemaValid": false,
+      "promotionReady": false,
+      "findingCodes": ["json_parse_failed"]
+    }
+  },
+  {
+    "id": "contamination_schema_mismatch_fails_closed",
+    "description": "Model returns JSON missing a required field; harness fails closed at the schema gate.",
+    "input": {
+      "candidateId": "cand-badschema-1",
+      "responseText": "Player snapshot only; no recommendation present."
+    },
+    "mockResponse": "{\"candidateId\":\"cand-badschema-1\",\"contaminated\":false,\"promotion_ready\":true}",
+    "expect": {
+      "jsonValid": true,
+      "schemaValid": false,
+      "promotionReady": false,
+      "findingCodes": ["schema_validation_failed"]
+    }
+  }
+]

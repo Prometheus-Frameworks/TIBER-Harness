@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifactId", "promotion_ready", "governanceBasis", "findings"],
+  "properties": {
+    "artifactId": { "type": "string", "minLength": 1 },
+    "promotion_ready": { "type": "boolean" },
+    "governanceBasis": { "type": "string", "enum": ["explicit_marker", "path_hint", "none"] },
+    "findings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

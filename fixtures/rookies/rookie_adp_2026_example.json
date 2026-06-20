@@ -1,0 +1,12 @@
+{
+  "artifactType": "rookie_adp_table",
+  "season": 2026,
+  "source": "sleeper_drafts_aggregate",
+  "rows": [
+    { "name": "Example RB A", "position": "RB", "adp": 4.2 },
+    { "name": "Example WR B", "position": "WR", "adp": 7.8 },
+    { "name": "Example TE C", "position": "TE", "adp": 31.5 }
+  ],
+  "governanceMarker": "none",
+  "note": "ADP aggregation. Descriptive distribution only; not a draft recommendation."
+}

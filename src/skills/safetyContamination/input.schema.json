@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidateId", "responseText"],
+  "properties": {
+    "candidateId": { "type": "string", "minLength": 1 },
+    "context": { "type": "string" },
+    "responseText": { "type": "string" }
+  }
+}

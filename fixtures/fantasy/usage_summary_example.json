@@ -1,0 +1,13 @@
+{
+  "artifactType": "fantasy_usage_summary",
+  "gsisId": "00-0036355",
+  "window": "last_4_weeks",
+  "metrics": {
+    "targetShare": 0.27,
+    "airYardsShare": 0.31,
+    "routesRun": 142,
+    "redZoneTargets": 6
+  },
+  "governanceMarker": "none",
+  "note": "Descriptive usage metrics. Intentionally contains no start/sit, trade, or ranking advice."
+}

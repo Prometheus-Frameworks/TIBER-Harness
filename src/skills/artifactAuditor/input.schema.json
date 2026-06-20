@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifactId", "path", "content"],
+  "properties": {
+    "artifactId": { "type": "string", "minLength": 1 },
+    "path": { "type": "string", "minLength": 1 },
+    "governanceMarker": { "type": "string", "enum": ["explicit_governed", "none"] },
+    "content": { "type": "string" }
+  }
+}
