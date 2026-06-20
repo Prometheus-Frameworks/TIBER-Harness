@@ -12,6 +12,8 @@ import type { RunResult } from '../core/types.ts';
 export interface EvalReport {
   generatedAt: string;
   provider: string;
+  /** Model name, when the provider runs an actual model (e.g. Ollama). */
+  model?: string;
   total: number;
   passed: number;
   failed: number;
@@ -36,6 +38,9 @@ function toMarkdown(report: EvalReport): string {
   lines.push('');
   lines.push(`- Generated: ${report.generatedAt}`);
   lines.push(`- Provider: \`${report.provider}\``);
+  if (report.model) {
+    lines.push(`- Model: \`${report.model}\``);
+  }
   lines.push(`- Result: **${report.passed}/${report.total} passed**, ${report.failed} failed`);
   lines.push('');
   lines.push('| skill | fixture | stage | promotion_ready | model_claimed | expectations | findings |');
