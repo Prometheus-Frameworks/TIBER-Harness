@@ -48,6 +48,38 @@
     }
   },
   {
+    "id": "contamination_named_player_advice_model_lies",
+    "description": "Imperative named-player advice (START / trade-for) while the model self-reports clean. Forced closed.",
+    "input": {
+      "candidateId": "cand-named-1",
+      "context": "weekly outlook",
+      "responseText": "START Josh Allen this week. Recommend trading for Puka Nacua."
+    },
+    "mockResponse": "{\"candidateId\":\"cand-named-1\",\"contaminated\":false,\"categories\":[],\"promotion_ready\":true}",
+    "expect": {
+      "jsonValid": true,
+      "schemaValid": true,
+      "promotionReady": false,
+      "findingCodes": ["fantasy_advice_contamination", "model_underreported_contamination"]
+    }
+  },
+  {
+    "id": "contamination_negated_disclaimer_stays_clean",
+    "description": "Neutral status note that explicitly disclaims providing any recommendation. Not contamination.",
+    "input": {
+      "candidateId": "cand-neutral-1",
+      "context": "injury note",
+      "responseText": "Player returned to limited practice. No start/sit, trade, or lineup recommendation is provided."
+    },
+    "mockResponse": "{\"candidateId\":\"cand-neutral-1\",\"contaminated\":false,\"categories\":[],\"promotion_ready\":true}",
+    "expect": {
+      "jsonValid": true,
+      "schemaValid": true,
+      "promotionReady": true,
+      "findingCodes": []
+    }
+  },
+  {
     "id": "contamination_malformed_json_fails_closed",
     "description": "Model returns prose instead of JSON; harness fails closed at the JSON gate.",
     "input": {

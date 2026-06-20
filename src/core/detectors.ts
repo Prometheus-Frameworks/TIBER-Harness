@@ -64,27 +64,89 @@ export function detectPromptInjection(texts: string[]): Finding[] {
 
 /**
  * Fantasy-advice contamination. TIBER-Harness must never emit start/sit,
- * lineup, trade, add/drop, waiver, or ranking *recommendations*. We match on
- * imperative/recommendation framing so neutral descriptive text (e.g. a fixture
- * literally named "fantasy") does not false-positive.
+ * lineup, trade, add/drop, waiver, or ranking *recommendations*.
+ *
+ * Detection is per-sentence and split into two tiers so we catch concrete
+ * advice (including named-player imperatives like "START Josh Allen" or
+ * "Buy Puka") without false-positiving neutral descriptive text or an explicit
+ * "no recommendation is provided" disclaimer:
+ *
+ *  - STRONG signals — imperative/recommendation framing or an advice verb
+ *    aimed at a named player. A disclaimer can NEVER rescue these.
+ *  - WEAK signals — bare advice keywords ("start/sit", "lineup recommendation").
+ *    Real advice, but suppressible by an explicit "none provided" disclaimer in
+ *    the same sentence (so "No start/sit, trade, or lineup recommendation is
+ *    provided" stays clean).
  */
-const FANTASY_ADVICE_PATTERNS: RegExp[] = [
-  /\b(?:you should|i (?:recommend|suggest|advise)|recommend(?:ed|ation)?) (?:start|sit|bench|trade|drop|add|pick up|stash)/,
-  /\b(?:start|sit|bench|trade|drop) (?:him|her|them|your|player|this player)\b/,
+const STRONG_ADVICE_PATTERNS: RegExp[] = [
+  /\b(?:you should|i (?:recommend|suggest|advise)|recommend(?:ed|ation|ing|s)?) (?:start|sit|bench|trad(?:e|ing)|drop|add|pick up|stash|buy(?:ing)?|sell(?:ing)?)/,
+  /\b(?:start|sit|bench|trade|drop|buy|sell|stash|fade) (?:him|her|them|your|player|this player)\b/,
+];
+
+const WEAK_ADVICE_PATTERNS: RegExp[] = [
   /\bstart\/sit\b/,
   /\bset (?:your )?lineup\b/,
   /\b(?:add|drop|waiver) (?:recommendation|advice|priority)\b/,
   /\b(?:trade|buy|sell) (?:recommendation|advice|target|away)\b/,
+  /\b(?:lineup|ranking) recommendation\b/,
   /\brank(?:ed|ing)? (?:him|her|them) (?:ahead of|over|above|below)\b/,
   /\bbest (?:start|play|lineup) this week\b/,
 ];
 
+/**
+ * Advice verbs that, when aimed directly at a Capitalized player name, are
+ * unambiguous fantasy advice — e.g. "START Josh Allen", "Buy Puka",
+ * "Sell Josh Allen", "trading for Puka Nacua". Verb case is matched explicitly
+ * (lower / Title / UPPER) so the trailing `[A-Z][a-z]+` name class can stay
+ * case-sensitive (a `/i` flag would make `[A-Z]` match lowercase too).
+ */
+const NAMED_PLAYER_VERB_STEMS = [
+  'start', 'sit', 'bench', 'trade', 'trading', 'buy', 'buying', 'sell', 'selling',
+  'drop', 'add', 'stash', 'fade', 'flex', 'target', 'roster', 'rostering', 'acquire',
+];
+const NAMED_PLAYER_VERB_ALT = NAMED_PLAYER_VERB_STEMS.flatMap((stem) => [
+  stem,
+  stem.charAt(0).toUpperCase() + stem.slice(1),
+  stem.toUpperCase(),
+]).join('|');
+const NAMED_PLAYER_ADVICE = new RegExp(
+  `\\b(?:${NAMED_PLAYER_VERB_ALT})\\b\\s+(?:for\\s+|away\\s+|up\\s+|on\\s+)?[A-Z][a-z]+`,
+);
+
+/**
+ * An explicit "no/without ... recommendation/advice ... provided/given" clause.
+ * Only such a clause can suppress a WEAK keyword match. It cannot suppress a
+ * STRONG signal, so "you should start Josh (no recommendation provided)" is
+ * still flagged.
+ */
+const NO_ADVICE_DISCLAIMER =
+  /\b(?:no|without)\b[^.!?]*\b(?:recommendation|advice|suggestion|call)s?\b[^.!?]*\b(?:provided|given|offered|made|included|present|here|intended)\b/;
+
+/** Split into sentences so a disclaimer in one sentence can't mask advice in another. */
+function splitSentences(text: string): string[] {
+  return text
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+function sentenceIsContaminated(sentence: string): boolean {
+  const norm = normalize(sentence);
+  // STRONG signals are decisive; a disclaimer cannot rescue them.
+  if (STRONG_ADVICE_PATTERNS.some((p) => p.test(norm))) return true;
+  if (NAMED_PLAYER_ADVICE.test(sentence)) return true;
+  // WEAK signals are advice unless the sentence explicitly disclaims providing any.
+  if (WEAK_ADVICE_PATTERNS.some((p) => p.test(norm))) {
+    return !NO_ADVICE_DISCLAIMER.test(norm);
+  }
+  return false;
+}
+
 /** Detect fantasy-advice contamination in any collected text. */
 export function detectFantasyAdvice(texts: string[]): Finding[] {
   for (const text of texts) {
-    const norm = normalize(text);
-    for (const pattern of FANTASY_ADVICE_PATTERNS) {
-      if (pattern.test(norm)) {
+    for (const sentence of splitSentences(text)) {
+      if (sentenceIsContaminated(sentence)) {
         return [
           {
             code: 'fantasy_advice_contamination',

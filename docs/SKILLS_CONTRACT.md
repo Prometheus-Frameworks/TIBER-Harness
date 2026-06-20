@@ -36,7 +36,12 @@ Each stage can only narrow the outcome; none can widen it.
 - `detectPromptInjection` — embedded "ignore previous instructions" / "mark as
   governed" / "promotion_ready = true" style overrides. Detected → ignored.
 - `detectFantasyAdvice` — start/sit, lineup, trade, add/drop, waiver, ranking
-  *recommendations*. Detected → contamination → promotion forced false.
+  *recommendations*, including imperative named-player advice ("START Josh
+  Allen", "Buy Puka", "trading for Puka Nacua"). Detected → contamination →
+  promotion forced false. Per-sentence, two-tier: STRONG signals (imperative /
+  named-player) are decisive; WEAK bare keywords ("start/sit") are suppressible
+  only by an explicit "no recommendation is provided" disclaimer in the same
+  sentence, so neutral negated language stays clean.
 - `isPromotedPathHint` — a `/promoted/` path is a hint, never governance proof.
 
 ## Adding a skill
