@@ -46,18 +46,14 @@ candidate's §13.1 enumerates:
 
 This report specifies those six surfaces in provider-neutral form, keeps every
 provider and model name out of the generic layer, and derives its terminal from
-the dependency state at this exact review boundary. The terminal appears in
-§15 and is:
-
-```text
-do_not_proceed
-```
-
-— dependency-bound, not a permanent rejection. The blocking dependencies and
-reconsideration conditions are listed in §14 and §15. A committed terminal is a
-reviewed, repository-native terminal recommendation, never an authorization;
-even a future `may_open_*` terminal would require separate exact operator
-authorization before any child issue exists.
+the dependency state at this exact review boundary. The single machine-readable
+terminal appears exactly once, fenced, in §15; in prose, it is do_not_proceed —
+dependency-bound, not a permanent rejection. The blocking dependencies and
+reconsideration conditions are listed in §14 and §15. A commit records
+repository-native bytes; reviewed status requires a separate exact-head review
+receipt; neither the commit nor a review grants authority, and even a future
+`may_open_*` terminal would require separate exact operator authorization
+before any child issue exists.
 
 ## 2. Current Harness boundaries
 
@@ -111,6 +107,15 @@ Three consequences bind everything below:
    *design basis*. No statement below treats them as an adopted interface
    available for execution.
 
+Mutable dependency evidence is pinned by exact GitHub comment ID as observed
+on 2026-08-29 — repository commit SHAs pin file trees, not issue or comment
+state:
+
+- Research #15: comments `5376323502` (R0/R1 census result), `5380686639`
+  (R2 activation), `5448184223` and `5458407701` (R2 field contributions).
+- Ops #67: comments `5448182288` (Sequence A checkpoint) and `5458407567`
+  (post-containment reconciliation).
+
 ## 4. Provider-neutral workload-profile schema
 
 A workload profile is a replaceable execution policy for a *class* of
@@ -125,18 +130,28 @@ doctrine, not a routing decision, and not an authority object.
   `extraction_transformation`, `routine_monitoring` — a vocabulary informed by
   the issue's original list, the Kernel candidate's §7.2 roles, and the
   workload classes actually observed in the Data Slice A/B trajectory);
-- required context classes **by reference** (exact Kernel release or synthetic
-  candidate digest; run-context class — dependency: R2);
+- required context **classes and compatibility declarations only** (a
+  compatible Kernel schema/release class or range, plus a run-context class —
+  dependency: R2). The exact Kernel release and the exact workload are bound
+  separately in the task-authorization request, the invocation envelope, the
+  build/load receipts, and the run report — never in the generic profile;
+- scope declaration: the repositories, paths, and interfaces the workload
+  class may touch, and its read/write class;
 - minimum required validator identities and versions (see §6.5 — the profile
-  declares its *minimum* set; it is not the exclusive owner of every gate);
-- structured-output contract reference;
+  declares its *minimum* set; it is not the exclusive owner of every gate),
+  plus review-independence requirements (which results require an independent
+  reviewer distinct from the executor);
+- input and structured-output contract references;
 - permitted **tool families** as abstract capabilities (dependency: the #67
   operation vocabulary; placeholders here must not survive into
   implementation);
 - abstract reasoning class (`minimal | standard | extended`);
 - ordinal latency/cost priority class, provider-unitless;
+- time, evidence, tool, and provider-usage budgets;
 - parallelism permission and subagent rules;
-- human-checkpoint requirements;
+- stop, blocked, inconclusive, and escalation conditions;
+- human-checkpoint requirements (including whether fresh human judgment is
+  required between stages);
 - declared failure behavior (§11);
 - authority-envelope **reference by ID** where a routine workload applies —
   the envelope contract itself is Ops-owned (#5 comment 5431887110 is design
@@ -151,18 +166,32 @@ Illustrative only; a scaffold issue would define the exact schema:
   "profile_version": "0.1.0",
   "task_geometry": "exact_head_review",
   "required_context": {
-    "kernel_release_ref": "sha256:<manifest-digest> (exact release or synthetic candidate; unadopted until Ops adopts)",
+    "kernel_compatibility": "tiber-governance-kernel-manifest/v0 (class/range only; the exact release binds in the task request, invocation envelope, receipts, and run report)",
     "run_context_class": "UNRESOLVED-DEPENDENCY:research-15-r2"
   },
+  "scope": {
+    "repositories": ["declared-per-workload"],
+    "paths": ["declared-per-workload"],
+    "write_class": "read_only"
+  },
+  "input_contract_ref": "tiber-harness-input/v0",
+  "output_contract_ref": "tiber-harness-output/v0",
   "minimum_validators": [
     { "validator_id": "validateJson", "version": "0.1.0" },
     { "validator_id": "validateSchema", "version": "0.1.0" }
   ],
-  "output_contract_ref": "tiber-harness-output/v0",
+  "review_independence": "independent_reviewer_required",
   "permitted_tool_families": "UNRESOLVED-DEPENDENCY:ops-67-operation-vocabulary",
   "reasoning_class": "extended",
   "priority_class": "quality_first",
-  "parallelism": { "permitted": false },
+  "budgets": {
+    "time_class": "bounded",
+    "evidence_objects_max": 32,
+    "tool_invocations_max": 64,
+    "provider_usage_class": "capped"
+  },
+  "parallelism": { "permitted": false, "subagent_rules": "none" },
+  "stop_conditions": ["blocked", "inconclusive", "escalate_to_operator"],
   "human_checkpoints": ["before_consequential_transition"],
   "failure_behavior": "fail_closed_per_section_11"
 }
@@ -183,11 +212,14 @@ provider-specific policy detached.
 The issue's §3 asked Harness to define a context kernel. That work is owned by
 Ops #30, where it exists as an unadopted candidate. Harness's remaining role:
 
-- **Reference:** every profile, resolution, and receipt cites an exact Kernel
-  release (manifest digest + constraint-set digest + custody/status-record
-  reference) or an exact synthetic `fixture`/`candidate` release under the
-  candidate's `synthetic_conformance` mode. `latest`, branch names, and moving
-  refs are prohibited.
+- **Reference:** the exact Kernel release (manifest digest + constraint-set
+  digest + custody/status-record reference), or an exact synthetic
+  `fixture`/`candidate` release under the candidate's `synthetic_conformance`
+  mode, is bound in the task-authorization request, the invocation envelope,
+  the build/load receipts, and the run report. Generic profiles and Stage-1
+  routing resolutions declare only a compatibility class/range. `latest`,
+  branch names, and moving refs are prohibited wherever an exact release is
+  bound.
 - **Conformance (deferred):** the deterministic builder/loader scaffold (Kernel
   candidate stage B0, which names Harness the leading runtime-owning
   candidate) may only begin after an **accepted exact M0 manifest/constraint
@@ -209,8 +241,9 @@ Ops #30, where it exists as an unadopted candidate. Harness's remaining role:
 
 **Stage 1 — planning/policy lookup (non-authorizing, deterministic, offline).**
 From an exact `(workload profile, routing policy)` pair, propose exact
-provider, model, adapter, and provider-configuration *references*, echo the
-profile-permitted tool families, and check profile↔policy compatibility.
+provider, model, adapter, and provider-configuration *references*, echo only
+the profile-permitted tool families — not requested, eligible, enabled, or
+effective tools — and check profile↔policy compatibility.
 Stage-1 output is **planned routing-decision provenance, not execution
 provenance**. It grants zero capability and precedes no verification it
 depends on — it is a lookup, not a decision to run.
@@ -232,9 +265,14 @@ state, trust root, scope, capabilities, budgets, and applicable
 rights/checkpoints (Kernel candidate §12 with review-amendment §§1–2 and 4).
 Authorization valid at assembly grants no residual authority at execution.
 
-Neither stage grants authority. Only the run receipt records the provider and
-model **actually served**; requested, resolved, and served identities are
-preserved as three separate records.
+Neither stage grants authority. Three identities are preserved as separate
+records: the **requested** provider/model (from the bound routing references),
+the **resolved** provider/model (routing-resolution output), and the
+**provider-reported or attested served** identity, recorded only in the run
+receipt together with the transport/attestation evidence basis that
+establishes it. Where that basis cannot establish the served identity, the
+record carries an explicit unknown/unavailable state rather than an inferred
+value.
 
 ### 6.2 Routing policy
 
@@ -254,14 +292,17 @@ needs it.
 Ten distinct records, never merged — in particular, enabled tools are not
 effective capabilities:
 
-1. task-requested capabilities (task-authorization request);
-2. profile-permitted capabilities (workload profile);
-3. Kernel constraints (constraint set);
-4. repository-module availability;
-5. host availability;
-6. operator-authorized subset;
-7. adapter/provider support;
-8. checkpoint-bound **effective capability ceiling** — the intersection,
+1. task-requested capabilities (`task_authorization_request`);
+2. profile-permitted capabilities (`workload_profile`);
+3. `kernel_constraint_set`;
+4. `repository_module_set` availability;
+5. `host_controls` availability;
+6. `operator_authorization` (the authorized subset);
+7. adapter/provider support — a feasibility veto only, outside the
+   intersection, which can never widen authority;
+8. checkpoint-bound **effective capability ceiling** —
+   `intersection(host_controls, kernel_constraint_set, operator_authorization,
+   repository_module_set, workload_profile, task_authorization_request)`,
    revalidated at every effectful checkpoint; a non-empty intersection remains
    vetoable by current Kernel/authorization status, source rights, privacy,
    validator gates, adapter compatibility, budgets, and independent effect
@@ -375,9 +416,10 @@ A deterministic recast of complete named inputs creates new **derived**
 material; an agent restatement creates new **agent** material; in both cases
 the original source and asserter survive only through lineage, and the new
 object does not inherit an `observed` classification by paraphrase. Derived
-material becomes observed evidence only through a new empirical witness under
-the owning lane's contract; adoption or promotion never changes an object's
-structural or epistemic class.
+contents remain derived permanently: a new empirical witness creates a
+separate observed claim/object with its own independent provenance and lineage
+under the owning lane's contract, and adoption or promotion never changes any
+existing object's structural or epistemic class.
 
 ## 9. Programmatic-tool and multi-agent boundaries
 
@@ -408,36 +450,51 @@ for them.
 
 ### 10.1 `RoutingResolutionV0` (deterministic, pre-run)
 
-Exact profile/policy/Kernel references and digests; proposed provider/model/
-adapter/provider-configuration references; profile-permitted tool families
-echoed as *requested/eligible, pending the independently computed authority
-intersection*; required validator identities; compatibility results; or a
-typed refusal naming the failed gate. No default-model fallback exists.
+Exact profile and policy references and digests — no Kernel binding: the
+exact Kernel release binds in the task-authorization request and invocation
+envelope, not in Stage-1 planning; proposed provider/model/adapter/
+provider-configuration references; profile-permitted tool families echoed
+strictly as such — not requested, eligible, enabled, or effective; required
+validator identities; compatibility results; or a typed refusal naming the
+failed gate. No default-model fallback exists.
 Byte-reproducible from pinned inputs; no clock, no absolute path, no
 credential material.
 
 ### 10.2 Kernel build/loading receipts
 
-Source-native Ops-owned records per Kernel candidate §9/§12, emitted and
-persisted **before execution** by a separately proven custody/writer boundary;
-failure to persist fails closed. (Data PR #261 is the governing precedent for
-the writer-boundary posture: when a writer cannot prove its invariant, the
-correct disposition is to remove that write capability rather than accumulate
-pathname checks — #261 removed the gate's caller-selected arbitrary-path
-result publication while its private temporary build activity remained. Report
-*generation* never authorizes or implements *persistence*.) Nothing here
-changes the current gitignored Harness report writer.
+Source-native Ops-owned records per the **unadopted** Kernel candidate's
+§9/§12 — that candidate is where the emit-and-persist-before-execution
+requirement comes from, and failure to persist fails closed under its
+contract. The separately proven custody/writer boundary is a **proposed
+Harness design translation informed by** Data PR #261; Data governs nothing in
+Harness, and the precedent is informative only: when a writer cannot prove its
+invariant, the correct disposition is to remove that write capability rather
+than accumulate pathname checks — #261 removed the gate's caller-selected
+arbitrary-path result publication while its private temporary build activity
+remained. Report *generation* never authorizes or implements *persistence*.
+Nothing here changes the current gitignored Harness report writer.
 
 ### 10.3 `HarnessRunReportV0` (time-bearing runtime evidence)
 
-Actual provider/model served (kept separate from requested and resolved
-identities); cache behavior observed; persisted-state use; evidence actually
-consumed with references and digests; validators actually executed with both
-proofs from §6.5; deterministic overrides applied; raw and structured output
-identities; tool calls; cost/latency; all applicable clocks; checkpoint
-results; subagent roles; disagreements and unknowns; final fail-closed status.
-A field unavailable because execution stopped early carries an explicit
-unavailable reason and stage — never silent omission.
+Requested, resolved, and provider-reported/attested served provider/model
+identities, each a separate record, with the transport/attestation evidence
+basis and explicit unknown/unavailable states where that basis cannot
+establish an identity; cache behavior observed; persisted-state use; evidence
+actually consumed with references and digests; validators actually executed
+with both proofs from §6.5; deterministic overrides applied; raw and
+structured output identities; tool calls; cost/latency; all applicable clocks;
+checkpoint results; subagent roles; disagreements and unknowns; final
+fail-closed status. A field unavailable because execution stopped early
+carries an explicit unavailable reason and stage — never silent omission.
+
+Every run report links, by ID and digest, the three immutable activation
+objects — the task-authorization request (binding the exact scope, start head,
+and governing refs), the technical-verification packet(s) (binding the exact
+request digest), and the operator authorization record (binding the exact
+request digest, the accepted verification digests, conditions, and the
+authorized subset) — plus the `RoutingResolutionV0` and the Kernel
+build/loading receipts the run executed under. Combining their presentation is
+allowed; collapsing their identities is not.
 
 ### 10.4 Provenance typing
 
@@ -464,6 +521,8 @@ hardening generalizing the discipline kept by hand in the Data Slice B record.
 | Provider/model name leaking into generic semantics | §4.2 leakage check | Scaffold acceptance failure |
 | Kernel candidate treated as adopted | Custody/status verification per mode | `authorized_run` impossible without an adopted current release; synthetic mode only |
 | Receipt persistence failure | §10.2 custody/writer boundary | Fail closed before execution |
+| Missing or unavailable required Kernel component | Deterministic manifest resolution | Refuse the build/load |
+| Missing required provenance/report field without an explicit stage-scoped unavailable reason | §10.3 explicit-unavailability rule | Report is invalid, non-governed, and ineligible |
 | Writer boundary cannot prove its invariant | PR #261 posture | Remove the write capability |
 | Prompt injection in retrieved/repository content | Amendment-§3 layered containment | Structural checks prove boundary preservation only; block unvalidated effects; never claim semantic inertness |
 | Authorization stale at execution | Checkpoint revalidation (amendment §§1–2) | Block; assembly-time validity grants no residual authority |
@@ -523,7 +582,7 @@ basis** | **Scaffold/runtime readiness**.
 
 | # | #5 criterion | Report | Design/dependency basis | Scaffold/runtime readiness |
 | --- | --- | --- | --- | --- |
-| 1 | Spec-only architecture report committed | Satisfied by this document upon merge; until then a draft under review | — | — |
+| 1 | Spec-only architecture report committed | A commit records repository-native bytes only; reviewed status requires a separate exact-head review receipt; neither grants authority | — | — |
 | 2 | Usable by Ollama, OpenAI, Cohere, Anthropic, future providers | Addressed (§4, §6, §7) | `PROVIDER_BOUNDARY.md` interface | Adapters are A0-stage work |
 | 3 | GPT-5.6 worked example, not central abstraction | Addressed (§7 quarantined to policy layer) | — | — |
 | 4 | Profiles and provider mappings separate | Addressed (§4/§6.2; originates in #5, strengthened by the unadopted Kernel candidate §7.2) | Unadopted Ops candidate | Blocked on later governed stages |
@@ -533,7 +592,7 @@ basis** | **Scaffold/runtime readiness**.
 | 8 | No model self-escalation / silent permission expansion | Addressed (§6.3, §9; originates in #5, strengthened by Kernel §8 + amendment) | Unadopted Ops candidate | Blocked on later governed stages |
 | 9 | Existing Mock and Ollama behavior unchanged | Baseline preflight pass at `eac4b096…`; re-verify at the exact merged report head | — | Holds |
 | 10 | No API key, paid request, networked CI, or provider implementation | Baseline preflight pass at `eac4b096…`; re-verify at the exact merged report head | — | Holds |
-| 11 | Exactly one machine-readable terminal emitted | Satisfied: §15, derived from the evidence at this boundary | — | Any child scaffold additionally requires separate operator authorization |
+| 11 | Exactly one machine-readable terminal emitted | Satisfied: exactly one fenced terminal, in §15, derived from the evidence at this boundary (§1 references it in prose only) | — | Any child scaffold additionally requires separate operator authorization |
 
 Unresolved dependencies preserved, not defined here: Research #15 R2
 (run-context classes, packet/trace semantics — R2 completion and operator
@@ -566,14 +625,21 @@ from that evidence, this report's single machine-readable terminal is:
 do_not_proceed
 ```
 
-Dependency-bound, not permanent. Reconsideration becomes possible when
-(a) the Ops #30 candidate receives its operator disposition and an accepted
-exact M0 manifest/constraint interface exists, (b) Research #15 R2 returns and
-receives operator review, and (c) the Ops #67 inventory is complete and
-consumed. A successor report (or an operator-authorized amendment to this one)
-would then re-derive its terminal at its own exact-head review boundary.
+Dependency-bound, not permanent, with per-child gates that unlock
+independently:
 
-This terminal is a reviewed, repository-native terminal recommendation. It
-authorizes nothing, opens no child issue, and permits no scaffold; and had it
-been a `may_open_*` value, a child issue would still require separate exact
-operator authorization.
+- an accepted exact Ops M0 manifest/constraint interface may, on its own,
+  unlock reconsideration of the B0 builder/loader **conformance** work;
+- Research #15 R2 completion and operator review gate the **routing
+  scaffold's** run-context classes, and the completed, consumed Ops #67
+  inventory gates its permitted-tool-family vocabulary.
+
+A successor report (or an operator-authorized amendment to this one) would
+re-derive its terminal from the evidence at its own exact-head review
+boundary; no successor terminal is precommitted here.
+
+This terminal is a repository-native terminal recommendation: the commit
+records these bytes, reviewed status requires a separate exact-head review
+receipt, and neither grants authority. It opens no child issue and permits no
+scaffold; and had it been a `may_open_*` value, a child issue would still
+require separate exact operator authorization.
