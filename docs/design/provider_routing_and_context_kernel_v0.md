@@ -95,7 +95,7 @@ routing, capability, or receipt bindings today; the Ops Kernel candidate's
 | Decision-scoped context packet, compilation trace, continuation trace/evaluation, offline fixtures | TIBER-Research #15 R2 | **Activated and unfinished**; production compiler ownership deliberately unresolved |
 | Brought-agent capability/introspection vocabulary | TIBER-Ops #67 | **Incomplete**: Phase 1 spec plus field and post-containment checkpoints exist; the full Research #13 traversal inventory and no-repository acceptance harness remain open |
 | Workload profiles, routing policy, adapters, Kernel loading/conformance, observability, synthetic fixtures | TIBER-Harness (this report) | Specified here; implementation dependency-bound (§12, §14) |
-| Operator-context persistence | TIBER-Fantasy (#333 operations) | Merged local substrate; reuse, don't rebuild |
+| Operator-context persistence | TIBER-Fantasy (#333 operations) | Unpinned cross-repository observation — TIBER-Fantasy is not pinned in this report; the merged local-substrate state is consumed via the Ops #67 comment records noted below. Reuse, don't rebuild |
 | Engineering-trace custody and model-comparison replays | TIBER-Research #16 | `requires_more_observation` |
 | Evidence contracts and fail-closed gate precedent | TIBER-Data | Slice A/B merged; PR #261 containment merged at the pinned Data head |
 
@@ -113,14 +113,21 @@ Three consequences bind everything below:
    *design basis*. No statement below treats them as an adopted interface
    available for execution.
 
-Mutable dependency evidence is pinned by exact GitHub comment ID as observed
-on 2026-08-29 — repository commit SHAs pin file trees, not issue or comment
-state:
+Dependency evidence from GitHub issues is a **mutable current-state
+observation**, not a frozen pin: a comment ID plus an observation date
+identifies which record was read, but GitHub comments are editable and an ID
+does not freeze its body. Repository commit SHAs pin file trees only — never
+issue or comment state. The records consumed, as observed on 2026-08-29:
 
 - Research #15: comments `5376323502` (R0/R1 census result), `5380686639`
-  (R2 activation), `5448184223` and `5458407701` (R2 field contributions).
+  (R2 activation), and `5446705869`, `5448184223`, `5458407701` (R2 field
+  contributions whose semantics this report consumes as unresolved inputs).
 - Ops #67: comments `5448182288` (Sequence A checkpoint) and `5458407567`
   (post-containment reconciliation).
+
+A later scaffold or successor report that depends on any of these must bind
+immutable snapshots or body digests with exact observation metadata rather
+than inherit this observation.
 
 ## 4. Provider-neutral workload-profile schema
 
@@ -153,7 +160,8 @@ doctrine, not a routing decision, and not an authority object.
   operation vocabulary; placeholders here must not survive into
   implementation);
 - abstract reasoning class (`minimal | standard | extended`);
-- ordinal latency/cost priority class, provider-unitless;
+- separate ordinal latency-priority and cost-priority classes, each
+  provider-unitless and independently expressible;
 - a distinct provider-neutral context-priority class (how much governed
   context weight the workload warrants), also provider-unitless;
 - an allowed-network class with deny-by-default semantics — `none` unless
@@ -165,9 +173,13 @@ doctrine, not a routing decision, and not an authority object.
 - human-checkpoint requirements (including whether fresh human judgment is
   required between stages);
 - declared failure behavior (§11);
-- authority-envelope **reference by ID** where a routine workload applies —
-  the envelope contract itself is Ops-owned (#5 comment 5431887110 is design
-  input to it, not a Harness contract).
+- a routine-authority-envelope binding — exact ID, version, digest, and
+  current status — where a routine workload would apply. No pinned dependency
+  defines that envelope contract yet: #5 comment 5431887110 is design input,
+  Harness #8 owns the adjacent agent-work observability/coordination design,
+  and contract ownership remains **unresolved**. Until an owned, versioned
+  envelope contract exists, the `routine_monitoring` profile class is
+  excluded from any scaffold rather than gated on an undefined reference.
 
 Illustrative only; a scaffold issue would define the exact schema:
 
@@ -195,7 +207,8 @@ Illustrative only; a scaffold issue would define the exact schema:
   "review_independence": "independent_reviewer_required",
   "permitted_tool_families": "UNRESOLVED-DEPENDENCY:ops-67-operation-vocabulary",
   "reasoning_class": "extended",
-  "priority_class": "quality_first",
+  "latency_priority_class": "tolerant",
+  "cost_priority_class": "quality_first",
   "context_priority_class": "high",
   "network_class": "none",
   "budgets": {
@@ -271,6 +284,15 @@ routing-policy and adapter references: runtime independently **re-resolves and
 verifies** those bindings but may not reselect, default, or fall back. A
 material mapping change requires a new request and a new authorization.
 
+The provider configuration a run will use is bound **before authorization**,
+not left to mutable host state: a redacted, immutable
+configuration/endpoint identity — or the exact Stage-1 `RoutingResolutionV0`
+digest — is bound into the task-authorization request, carried into the
+operator authorization, re-verified in Stage 2, and recorded in the receipts.
+Host-side configuration drift against that bound identity refuses the run; a
+material configuration change, like a mapping change, requires a new request
+and a new authorization.
+
 Within stage 2, a **provisional provider-load construction** is distinct from
 an **executable invocation candidate**. The latter exists only after
 (a) mandatory build/loading-receipt persistence and (b) pre-execution
@@ -278,6 +300,9 @@ revalidation of current Kernel status, the complete operator-authorization
 state, trust root, scope, capabilities, budgets, and applicable
 rights/checkpoints (Kernel candidate §12 with review-amendment §§1–2 and 4).
 Authorization valid at assembly grants no residual authority at execution.
+The same full revalidation is repeated immediately before any consequential
+transition; a material change in any bound state since assembly refuses the
+transition rather than being absorbed.
 
 Neither stage grants authority. Three identities are preserved as separate
 records: the **requested** provider/model (from the bound routing references),
@@ -390,7 +415,13 @@ provider-load/request digest, execution mode, trust-root digest,
 custody/status-record digest, adapter and routing-policy digests,
 provider/model configuration, and tokenizer/estimator mapping. Cached provider
 output or persisted-reasoning reuse is separately keyed to the exact
-provider-request digest and provider execution configuration. A cache hit
+provider-request digest and provider execution configuration, and additionally
+partitioned by authenticated principal, workspace scope, and privacy class —
+an unscoped cache is a deterministic isolation failure (Research #15's
+isolation fixture, comment `5448184223`). Persisted provider state also
+carries an identity, version, lineage, and reset semantics so its reuse is
+inspectable and revocable. The full workspace-isolation semantics remain
+R2-dependent (UNRESOLVED-DEPENDENCY:research-15-r2). A cache hit
 remains incapable of replacing build/load validation, status checkpoints,
 evidence, freshness, or authority.
 
@@ -458,8 +489,11 @@ existing object's structural or epistemic class.
   externally derived least-privilege capabilities, typed tool interfaces,
   independent effect validation, and fail-closed checkpoints outside the
   model. Adversarial injection fixtures are resilience evidence only.
-- Routine/persistent-agent workloads (the #5 comment's design input) bind an
-  Ops-owned authority envelope by ID; preparation may be automated, but
+- Routine/persistent-agent workloads (the #5 comment's design input) would
+  bind a routine-authority envelope by exact ID, version, digest, and current
+  status — a contract whose ownership remains unresolved (§4.1; Harness #8
+  owns the adjacent observability/coordination design); preparation may be
+  automated, but
   commits, comments, merges, spending, credential changes, and any
   consequential action require separate exact operator authority. A suspected
   credential leak fails closed with redacted evidence and
@@ -488,10 +522,14 @@ credential material.
 
 ### 10.2 Kernel build/loading receipts
 
-Source-native Ops-owned records per the **unadopted** Kernel candidate's
-§9/§12 — that candidate is where the emit-and-persist-before-execution
-requirement comes from, and failure to persist fails closed under its
-contract. The separately proven custody/writer boundary is a **proposed
+Receipt-contract ownership and receipt-instance custody are distinct and must
+not be collapsed. The receipt **contract/schema** is governed through Ops —
+the **unadopted** Kernel candidate's §9/§12 is where the
+emit-and-persist-before-execution requirement comes from, and failure to
+persist fails closed under its contract. Receipt **instances** are emitted and
+custodied by the eventual runtime — Harness, per the candidate's §13.1
+observability/receipts role — with the custody location itself an unresolved
+Kernel question. The separately proven custody/writer boundary is a **proposed
 Harness design translation informed by** Data PR #261; Data governs nothing in
 Harness, and the precedent is informative only: when a writer cannot prove its
 invariant, the correct disposition is to remove that write capability rather
@@ -511,11 +549,18 @@ checkpoint corrections. At minimum:
   time, and supersession result);
 - exact workload-profile, routing-policy, adapter, and Kernel
   manifest/constraint-set references and digests;
+- Kernel component lineage (component IDs, paths, versions, and digests) plus
+  the doctrine-profile-or-absence marker, the ordered repository-module-set
+  identities and digests, and the evidence-index identity and digest;
+- operator-authorization detail: decision-record ID and digest, conditions,
+  effective/expiry bounds, requested and excluded attestation types, accepted
+  technical-verification-packet digests, and reauthorization-trigger state;
 - requested, resolved, and provider-reported/attested served provider/model
   identities, each a separate record, with the transport/attestation evidence
   basis and explicit unknown/unavailable states where that basis cannot
   establish an identity;
-- actual reasoning and provider configuration;
+- the reasoning class/effort and provider configuration actually applied —
+  configuration metadata only, never hidden reasoning content;
 - cache and persisted-state metadata per §8;
 - concretely configured/enabled tools, networks, repositories, paths, and
   budgets — kept separate from actual invocations and their per-effect
@@ -529,14 +574,26 @@ checkpoint corrections. At minimum:
 - provider invocation/transport identity and execution start/end times;
 - raw-output digest, structured-output digest, and the exact output-schema
   ID/version;
-- evidence references and per-axis source-use/admissibility outcomes;
+- evidence references with their dynamic classifications per the owning
+  schemas (namespaced epistemic, evidence-support, freshness,
+  technical-availability, privacy, and reportability states), and the exact
+  source-use policy binding — policy ID, status, decision reference,
+  intended-use axes, and per-axis outcomes;
 - validator executions with both proofs from §6.5; deterministic overrides
   applied; subagent roles and shared pins; disagreements and unknowns; and
   the final fail-closed or handoff status.
 
-Separate checkpoint results are recorded for: Kernel-status currency;
-authorization currency; issuer/trust-root validity; scope/capability/budget
-consistency; and independent external-effect validation.
+Each checkpoint binds the authoritative registry-head proof it used — its
+identity, digest, sequence/monotonicity evidence, observation time, freshness
+result, and supersession/revocation outcome; a cache entry or historically
+valid record cannot substitute for that proof. Separate results are recorded,
+at both the pre-execution checkpoint and the pre-consequential-transition
+checkpoint, for: Kernel-status currency; authorization currency;
+issuer/trust-root validity; scope/capability/budget consistency; and
+independent external-effect validation. The pre-transition checkpoint repeats
+the full revalidation and recomputes the effective capability intersection;
+any widening or material change of the bound state since assembly refuses the
+transition rather than being absorbed.
 
 A field that cannot exist because execution stopped early carries an explicit
 unavailable reason and stage — never silent omission.
