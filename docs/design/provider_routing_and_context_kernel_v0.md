@@ -70,8 +70,14 @@ Verified at the base SHA rather than assumed:
 - **Reports are local.** `src/reports/writeReport.ts` writes JSON and Markdown
   to `data/reports/`, which is gitignored. This report does not change that
   behavior and no conclusion below requires changing it.
-- **Prompt injection is inert data.** Instructions embedded in model output or
-  echoed artifact content are detected and ignored, never obeyed.
+- **Repository and retrieved content is untrusted data and grants zero
+  authority.** Detectors and structural validation may identify suspicious
+  patterns, reject output, or prove boundary preservation; they cannot prove
+  that a probabilistic model ignored instruction-like content or that its
+  output was semantically unaffected. Safety rests on externally derived
+  least-privilege capabilities and independent effect validation outside the
+  model (§9, §11), consistent with the Kernel review amendment's §3 claim
+  boundary.
 - **Harness is not a product surface,** promotes nothing real, holds no
   football truth, and is not a runtime dependency of any domain repository.
 
@@ -137,8 +143,9 @@ doctrine, not a routing decision, and not an authority object.
   build/load receipts, and the run report — never in the generic profile;
 - scope declaration: the repositories, paths, and interfaces the workload
   class may touch, and its read/write class;
-- minimum required validator identities and versions (see §6.5 — the profile
-  declares its *minimum* set; it is not the exclusive owner of every gate),
+- the profile-declared minimum validator identities and versions (see §6.5 —
+  the profile declares its *minimum* set; it is not the exclusive owner of
+  every gate),
   plus review-independence requirements (which results require an independent
   reviewer distinct from the executor);
 - input and structured-output contract references;
@@ -147,6 +154,11 @@ doctrine, not a routing decision, and not an authority object.
   implementation);
 - abstract reasoning class (`minimal | standard | extended`);
 - ordinal latency/cost priority class, provider-unitless;
+- a distinct provider-neutral context-priority class (how much governed
+  context weight the workload warrants), also provider-unitless;
+- an allowed-network class with deny-by-default semantics — `none` unless
+  explicitly declared; live endpoints, provider syntax, and credentials remain
+  outside the generic profile in host-controlled configuration;
 - time, evidence, tool, and provider-usage budgets;
 - parallelism permission and subagent rules;
 - stop, blocked, inconclusive, and escalation conditions;
@@ -184,6 +196,8 @@ Illustrative only; a scaffold issue would define the exact schema:
   "permitted_tool_families": "UNRESOLVED-DEPENDENCY:ops-67-operation-vocabulary",
   "reasoning_class": "extended",
   "priority_class": "quality_first",
+  "context_priority_class": "high",
+  "network_class": "none",
   "budgets": {
     "time_class": "bounded",
     "evidence_objects_max": 32,
@@ -295,8 +309,9 @@ effective capabilities:
 1. task-requested capabilities (`task_authorization_request`);
 2. profile-permitted capabilities (`workload_profile`);
 3. `kernel_constraint_set`;
-4. `repository_module_set` availability;
-5. `host_controls` availability;
+4. `repository_module_set` — the complete canonical constraint object,
+   including its prohibitions and narrowing semantics;
+5. `host_controls` — likewise the complete canonical constraint object;
 6. `operator_authorization` (the authorized subset);
 7. adapter/provider support — a feasibility veto only, outside the
    intersection, which can never widen authority;
@@ -310,7 +325,9 @@ effective capabilities:
 9. concretely configured/exposed tools;
 10. actual invocations and per-effect validation results.
 
-Adapter/provider support may veto feasibility but never widens authority.
+Operand availability may be verified separately, but an availability check
+never substitutes for the operand itself. Adapter/provider support may veto
+feasibility but never widens authority.
 Retrieved evidence contributes zero capabilities. Models cannot expand their
 own permissions; model-proposed tool calls are untrusted proposals validated
 outside the model.
@@ -367,9 +384,15 @@ is a worked example, not the abstraction.
 
 Explicit prompt caching, persisted reasoning, reasoning-effort levels,
 programmatic tool calling, and multi-agent support are adapter/policy concerns
-with the trust boundaries of §8 and §9. Cache keys follow the Kernel
-candidate's §10 binding (context-assembly digest, provider-load digest, mode,
-trust root, adapter and routing digests, provider configuration, tokenizer).
+with the trust boundaries of §8 and §9. The provider-load cache key follows
+the Kernel candidate's §10 binding: the exact context-assembly digest,
+provider-load/request digest, execution mode, trust-root digest,
+custody/status-record digest, adapter and routing-policy digests,
+provider/model configuration, and tokenizer/estimator mapping. Cached provider
+output or persisted-reasoning reuse is separately keyed to the exact
+provider-request digest and provider execution configuration. A cache hit
+remains incapable of replacing build/load validation, status checkpoints,
+evidence, freshness, or authority.
 
 ### 7.3 Routing-hypothesis register
 
@@ -454,9 +477,12 @@ Exact profile and policy references and digests — no Kernel binding: the
 exact Kernel release binds in the task-authorization request and invocation
 envelope, not in Stage-1 planning; proposed provider/model/adapter/
 provider-configuration references; profile-permitted tool families echoed
-strictly as such — not requested, eligible, enabled, or effective; required
-validator identities; compatibility results; or a typed refusal naming the
-failed gate. No default-model fallback exists.
+strictly as such — not requested, eligible, enabled, or effective; the
+profile-declared **minimum** validator set and policy-compatibility results —
+the complete effective validator set is derived and independently proven
+during Stage 2, after Kernel-constraint, repository-module,
+task-authorization, and operator-condition additions; or a typed refusal
+naming the failed gate. No default-model fallback exists.
 Byte-reproducible from pinned inputs; no clock, no absolute path, no
 credential material.
 
@@ -476,16 +502,44 @@ Nothing here changes the current gitignored Harness report writer.
 
 ### 10.3 `HarnessRunReportV0` (time-bearing runtime evidence)
 
-Requested, resolved, and provider-reported/attested served provider/model
-identities, each a separate record, with the transport/attestation evidence
-basis and explicit unknown/unavailable states where that basis cannot
-establish an identity; cache behavior observed; persisted-state use; evidence
-actually consumed with references and digests; validators actually executed
-with both proofs from §6.5; deterministic overrides applied; raw and
-structured output identities; tool calls; cost/latency; all applicable clocks;
-checkpoint results; subagent roles; disagreements and unknowns; final
-fail-closed status. A field unavailable because execution stopped early
-carries an explicit unavailable reason and stage — never silent omission.
+The run report covers the Harness #5 required report fields and the Ops
+Kernel candidate's §12 run-receipt minimums, with the review amendment's
+checkpoint corrections. At minimum:
+
+- execution mode, trust-root ID/version/digest, and the current Kernel
+  release/status evidence used (custody/status-record digest, observation
+  time, and supersession result);
+- exact workload-profile, routing-policy, adapter, and Kernel
+  manifest/constraint-set references and digests;
+- requested, resolved, and provider-reported/attested served provider/model
+  identities, each a separate record, with the transport/attestation evidence
+  basis and explicit unknown/unavailable states where that basis cannot
+  establish an identity;
+- actual reasoning and provider configuration;
+- cache and persisted-state metadata per §8;
+- concretely configured/enabled tools, networks, repositories, paths, and
+  budgets — kept separate from actual invocations and their per-effect
+  validation results;
+- the effective-capability calculation (§6.3);
+- per-layer byte/token counts, output reserve, omissions, and overflow
+  diagnostics;
+- token, cost, and latency metadata where available, and all applicable
+  clocks;
+- context-assembly and provider-load/request digests;
+- provider invocation/transport identity and execution start/end times;
+- raw-output digest, structured-output digest, and the exact output-schema
+  ID/version;
+- evidence references and per-axis source-use/admissibility outcomes;
+- validator executions with both proofs from §6.5; deterministic overrides
+  applied; subagent roles and shared pins; disagreements and unknowns; and
+  the final fail-closed or handoff status.
+
+Separate checkpoint results are recorded for: Kernel-status currency;
+authorization currency; issuer/trust-root validity; scope/capability/budget
+consistency; and independent external-effect validation.
+
+A field that cannot exist because execution stopped early carries an explicit
+unavailable reason and stage — never silent omission.
 
 Every run report links, by ID and digest, the three immutable activation
 objects — the task-authorization request (binding the exact scope, start head,
@@ -510,7 +564,8 @@ hardening generalizing the discipline kept by hand in the Data Slice B record.
 
 | Threat / failure | Control | Failure behavior |
 | --- | --- | --- |
-| Unknown, unpinned, or digest-mismatched profile, policy, or Kernel reference | Exact-reference resolution (§6.1) | Refuse the resolution; no default |
+| Unknown, unpinned, or digest-mismatched profile or routing policy | Exact-reference resolution (§6.1 Stage 1) | Refuse the Stage-1 `RoutingResolutionV0`; no default |
+| Unknown, unpinned, or digest-mismatched exact Kernel binding | Task-request / invocation-envelope verification (§5, §6.1 Stage 2) | Refuse the Stage-2 build/load/invocation |
 | Profile with no mapping in the active policy | Stage-1 compatibility check | Refuse; no fallback model |
 | Runtime reselection, default, or fallback of a bound mapping | Request-bound routing references (§6.1) | Blocked; material change requires a new request and authorization |
 | Missing/unavailable declared validator | Load/identity proof (§6.5) | A stage that cannot run is a failure, never a skip |
@@ -582,7 +637,7 @@ basis** | **Scaffold/runtime readiness**.
 
 | # | #5 criterion | Report | Design/dependency basis | Scaffold/runtime readiness |
 | --- | --- | --- | --- | --- |
-| 1 | Spec-only architecture report committed | A commit records repository-native bytes only; reviewed status requires a separate exact-head review receipt; neither grants authority | — | — |
+| 1 | Spec-only architecture report committed | Satisfied at exact branch head: the report exists in a commit (predecessor head `251c23f319cff9d5a1021572fa210598ad9937d1`; the commit carrying this row cannot embed its own hash — the PR head receipt binds it externally, per the Kernel candidate's two-step custody binding). A commit records repository-native bytes only; reviewed status requires a separate exact-head review receipt; neither grants authority | — | — |
 | 2 | Usable by Ollama, OpenAI, Cohere, Anthropic, future providers | Addressed (§4, §6, §7) | `PROVIDER_BOUNDARY.md` interface | Adapters are A0-stage work |
 | 3 | GPT-5.6 worked example, not central abstraction | Addressed (§7 quarantined to policy layer) | — | — |
 | 4 | Profiles and provider mappings separate | Addressed (§4/§6.2; originates in #5, strengthened by the unadopted Kernel candidate §7.2) | Unadopted Ops candidate | Blocked on later governed stages |
