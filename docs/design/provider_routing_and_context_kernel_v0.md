@@ -301,8 +301,9 @@ state, trust root, scope, capabilities, budgets, and applicable
 rights/checkpoints (Kernel candidate §12 with review-amendment §§1–2 and 4).
 Authorization valid at assembly grants no residual authority at execution.
 The same full revalidation is repeated immediately before any consequential
-transition; a material change in any bound state since assembly refuses the
-transition rather than being absorbed.
+transition, and the effective capability intersection is recomputed at each
+checkpoint; the provider execution or the transition is refused whenever that
+intersection has widened or otherwise changed since assembly.
 
 Neither stage grants authority. Three identities are preserved as separate
 records: the **requested** provider/model (from the bound routing references),
@@ -583,17 +584,30 @@ checkpoint corrections. At minimum:
   applied; subagent roles and shared pins; disagreements and unknowns; and
   the final fail-closed or handoff status.
 
-Each checkpoint binds the authoritative registry-head proof it used — its
-identity, digest, sequence/monotonicity evidence, observation time, freshness
-result, and supersession/revocation outcome; a cache entry or historically
-valid record cannot substitute for that proof. Separate results are recorded,
-at both the pre-execution checkpoint and the pre-consequential-transition
-checkpoint, for: Kernel-status currency; authorization currency;
-issuer/trust-root validity; scope/capability/budget consistency; and
-independent external-effect validation. The pre-transition checkpoint repeats
-the full revalidation and recomputes the effective capability intersection;
-any widening or material change of the bound state since assembly refuses the
-transition rather than being absorbed.
+Each checkpoint — immediately before every provider execution and immediately
+before every consequential transition — binds the authoritative registry-head
+proof it used, explicitly requiring and recording every field the Kernel
+review amendment mandates:
+
+- monotonic ordering or sequence evidence;
+- the exact registry-head/checkpoint digest;
+- the trusted custody identity;
+- the observation time;
+- the maximum permitted observation age;
+- the freshness result;
+- membership of the presented release/status record in that authoritative
+  head; and
+- the current supersession, revocation, withdrawal, successor, and explicit
+  non-revocation results for the exact manifest digest.
+
+A cache entry, old observation receipt, release-local signature, or
+historically valid status record cannot substitute for that proof. Separate
+results are recorded at both checkpoints for: Kernel-status currency;
+authorization currency; issuer/trust-root validity; scope/capability/budget
+consistency; and independent external-effect validation. Each checkpoint
+recomputes the effective capability intersection; the provider execution or
+the transition is refused whenever that intersection has widened or otherwise
+changed since assembly.
 
 A field that cannot exist because execution stopped early carries an explicit
 unavailable reason and stage — never silent omission.
