@@ -267,8 +267,9 @@ Ops #30, where it exists as an unadopted candidate. Harness's remaining role:
 ### 6.1 Two stages, ordered by the Kernel loading sequence
 
 **Stage 1 — planning/policy lookup (non-authorizing, deterministic, offline).**
-From an exact `(workload profile, routing policy)` pair, propose exact
-provider, model, adapter, and provider-configuration *references*, echo only
+From the exact `(workload profile, routing policy, digest of the resolved,
+redacted configuration/endpoint identity)` input tuple, propose exact provider,
+model, adapter, and provider-configuration *references*, echo only
 the profile-permitted tool families — not requested, eligible, enabled, or
 effective tools — and check profile↔policy compatibility.
 Stage-1 output is **planned routing-decision provenance, not execution
