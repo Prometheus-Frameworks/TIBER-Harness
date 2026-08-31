@@ -285,13 +285,16 @@ verifies** those bindings but may not reselect, default, or fall back. A
 material mapping change requires a new request and a new authorization.
 
 The provider configuration a run will use is bound **before authorization**,
-not left to mutable host state: a redacted, immutable
-configuration/endpoint identity — or the exact Stage-1 `RoutingResolutionV0`
-digest — is bound into the task-authorization request, carried into the
-operator authorization, re-verified in Stage 2, and recorded in the receipts.
-Host-side configuration drift against that bound identity refuses the run; a
-material configuration change, like a mapping change, requires a new request
-and a new authorization.
+not left to mutable host state: the redacted, immutable resolved
+configuration/endpoint identity **and its digest** are always bound into the
+task-authorization request, carried into the operator authorization,
+re-verified in Stage 2, and recorded in the receipts. The exact Stage-1
+`RoutingResolutionV0` digest is also bound, and that resolution must itself
+include the resolved configuration/endpoint identity digest; neither an opaque
+provider-configuration reference nor the resolution digest alone substitutes
+for the separately bound resolved identity. Host-side configuration drift
+against that bound identity refuses the run; a material configuration change,
+like a mapping change, requires a new request and a new authorization.
 
 Within stage 2, a **provisional provider-load construction** is distinct from
 an **executable invocation candidate**. The latter exists only after
@@ -511,15 +514,18 @@ for them.
 Exact profile and policy references and digests — no Kernel binding: the
 exact Kernel release binds in the task-authorization request and invocation
 envelope, not in Stage-1 planning; proposed provider/model/adapter/
-provider-configuration references; profile-permitted tool families echoed
+provider-configuration reference and the digest of its resolved, redacted
+configuration/endpoint identity; profile-permitted tool families echoed
 strictly as such — not requested, eligible, enabled, or effective; the
 profile-declared **minimum** validator set and policy-compatibility results —
 the complete effective validator set is derived and independently proven
 during Stage 2, after Kernel-constraint, repository-module,
 task-authorization, and operator-condition additions; or a typed refusal
 naming the failed gate. No default-model fallback exists.
-Byte-reproducible from pinned inputs; no clock, no absolute path, no
-credential material.
+The resolved-identity digest is a pinned Stage-1 input and is also bound
+separately in the task-authorization request; an opaque reference or the
+resolution digest alone cannot stand in for it. Byte-reproducible from pinned
+inputs; no clock, no absolute path, no credential material.
 
 ### 10.2 Kernel build/loading receipts
 
@@ -708,7 +714,7 @@ basis** | **Scaffold/runtime readiness**.
 
 | # | #5 criterion | Report | Design/dependency basis | Scaffold/runtime readiness |
 | --- | --- | --- | --- | --- |
-| 1 | Spec-only architecture report committed | Satisfied at exact branch head: the report exists in a commit (predecessor head `251c23f319cff9d5a1021572fa210598ad9937d1`; the commit carrying this row cannot embed its own hash — the PR head receipt binds it externally, per the Kernel candidate's two-step custody binding). A commit records repository-native bytes only; reviewed status requires a separate exact-head review receipt; neither grants authority | — | — |
+| 1 | Spec-only architecture report committed | Satisfied at exact branch head: the report exists in a commit (predecessor head `3138c3d9e6fdbde258c161d5ac5aeddbaf91497d`; the commit carrying this row cannot embed its own hash — the PR head receipt binds it externally, per the Kernel candidate's two-step custody binding). A commit records repository-native bytes only; reviewed status requires a separate exact-head review receipt; neither grants authority | — | — |
 | 2 | Usable by Ollama, OpenAI, Cohere, Anthropic, future providers | Addressed (§4, §6, §7) | `PROVIDER_BOUNDARY.md` interface | Adapters are A0-stage work |
 | 3 | GPT-5.6 worked example, not central abstraction | Addressed (§7 quarantined to policy layer) | — | — |
 | 4 | Profiles and provider mappings separate | Addressed (§4/§6.2; originates in #5, strengthened by the unadopted Kernel candidate §7.2) | Unadopted Ops candidate | Blocked on later governed stages |
