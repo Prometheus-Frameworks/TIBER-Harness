@@ -1,5 +1,7 @@
 # TIBER-Harness
 
+> **[TIBER Now — what works, what we’re building, and what’s still conceptual](https://github.com/Prometheus-Frameworks/TIBER-Fantasy/blob/main/docs/TIBER_NOW.md)**
+
 Model-agnostic **runtime and evaluation harness** for testing AI providers
 against TIBER contracts, skills, fixtures, schemas, and deterministic safety
 validators.
